@@ -115,7 +115,9 @@ class Server {
 
         this._ws_servers.push(ws_server);
       };
-
+        
+      logger.info('will install http server listeners');
+        
       const path_replace = new RegExp('^' + this._path + '/');
       const add_http_listener = (server) => {
         // TODO: this doesn't play well with a user removing listeners (or maybe even `once`)
@@ -158,8 +160,10 @@ class Server {
       });
 
       if (http_servers.forEach === undefined) {
+        logger.info('setup websocket and http listener');
         add_websocket(http_servers);
         add_http_listener(http_servers);
+        logger.info('setup websocket and http listener done');
       } else {
         http_servers.forEach((s) => { add_websocket(s); add_http_listener(s); });
       }
