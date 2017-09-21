@@ -7,6 +7,7 @@ const Request = require('./request').Request;
 const Joi = require('joi');
 const websocket = require('ws');
 
+
 class Client {
   constructor(socket, server, metadata) {
     logger.debug('Client connection established.');
@@ -210,7 +211,8 @@ class Client {
 
 const make_client = (socket, server) => {
   try {
-    const metadata = server._reql_conn.metadata();
+    var metadata = server._reql_conn.metadata();
+    metadata.sig_dispatcher = server.get_sig_dispatcher();
     const client = new Client(socket, server, metadata);
     server._reql_conn._clients.add(client);
   } catch (err) {

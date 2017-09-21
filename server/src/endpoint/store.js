@@ -14,10 +14,11 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
 
   const collection = metadata.collection(parsed.value.collection);
   const conn = metadata.connection();
-
+  parsed.value.data.map((row) => metadata.sig_dispatcher.bind_call(parsed.value.collection, row));
+  console.log(parsed.value.data);
   writes.retry_loop(parsed.value.data, ruleset, parsed.value.timeout,
     (rows) => // pre-validation, all rows
-      r.expr(rows.map((row) => (row.id === undefined ? null : row.id)))
+      r.expr(rows.map((row) => row.id === undefined ? null : row.id))
         .map((id) => r.branch(id.eq(null), null, collection.table.get(id)))
         .run(conn, reql_options),
     (row, info) => writes.validate_old_row_optional(context, row, info, row, ruleset),

@@ -14,6 +14,7 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
 
   const collection = metadata.collection(parsed.value.collection);
   const conn = metadata.connection();
+  parsed.value.data.map((row) => metadata.sig_dispatcher.bind_call(parsed.value.collection, row));
 
   writes.retry_loop(parsed.value.data, ruleset, parsed.value.timeout,
     (rows) => // pre-validation, all rows

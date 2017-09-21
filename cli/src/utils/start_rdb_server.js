@@ -6,7 +6,6 @@ const horizon_server = require('@horizon/server');
 const execSync = require('child_process').execSync;
 const spawn = require('child_process').spawn;
 const hasbinSync = require('hasbin').sync;
-
 const defaultDatadir = 'rethinkdb_data';
 
 const infoLevelLog = (msg) => /^Running/.test(msg) || /^Listening/.test(msg);
@@ -17,7 +16,7 @@ const version_check = horizon_server.utils.rethinkdb_version_check;
 
 class RethinkdbServer {
   constructor(options) {
-    const quiet = Boolean(options.quiet);
+    const quiet = false; // Boolean(options.quiet);
     const bind = options.bind || [ '127.0.0.1' ];
     const dataDir = options.dataDir || defaultDatadir;
     const driverPort = options.rdbPort;
@@ -25,12 +24,22 @@ class RethinkdbServer {
     const cacheSize = options.cacheSize || 200;
 
     // Check if `rethinkdb` in PATH
+    /* ZZZ
     if (!hasbinSync('rethinkdb')) {
       throw new Error('`rethinkdb` not found in $PATH, please install RethinkDB.');
     }
+    */
 
-    // Check if RethinkDB is sufficient version for Horizon
-    version_check(execSync('rethinkdb --version', { timeout: 5000 }).toString());
+    // Check iflogger.info RethinkDB is sufficient version for Horizon
+    logger.info('Checking docker version');
+    version_check(execSync('docker run -t --rm rethinkdb rethinkdb --version', { timeout: 5000 }).toString());
+    logger.info('Removing any hanging docker containers');
+    try {
+        logger.info(execSync('docker stop rethinkdbunittest').toString());
+    } catch(e){}
+    try {
+        logger.info(execSync('docker rm rethinkdbunittest').toString());
+    } catch(e){}
 
     const args = [ '--http-port', String(httpPort || 0),
                    '--cluster-port', '0',
@@ -39,9 +48,17 @@ class RethinkdbServer {
                    '--directory', dataDir,
                    '--no-update-check' ];
     bind.forEach((host) => args.push('--bind', host));
+    const dockerArgs = [ 'run', '--rm', '--name', 'rethinkdbunittest',
+                         '-p', '28015:28015',
+                         'rethinkdb',
+                         'rethinkdb',
+                         '--bind', 'all'];
 
-    this.proc = spawn('rethinkdb', args);
-
+    logger.info('Spawning the rethinkdb docker');
+    const spawnArgs = {
+        stdio: 'inherit'
+    };
+    this.proc = spawn('docker', dockerArgs);
     this.ready_promise = new Promise((resolve, reject) => {
       this.proc.once('error', reject);
       this.proc.once('exit', (exit_code) => {
@@ -66,6 +83,7 @@ class RethinkdbServer {
       };
 
       each_line_in_pipe(this.proc.stdout, (line) => {
+        line = line.toString('utf8');
         if (!quiet) {
           if (infoLevelLog(line)) {
             logger.info('RethinkDB', line);
@@ -111,6 +129,9 @@ class RethinkdbServer {
       if (this.proc.exitCode !== null) {
         resolve();
       } else {
+        try {
+            execSync('docker stop rethinkdbunittest');
+        } catch(e){}
         this.proc.kill('SIGTERM');
 
         this.proc.once('exit', () => {
@@ -118,6 +139,9 @@ class RethinkdbServer {
         });
 
         setTimeout(() => {
+          try {
+              execSync('docker stop rethinkdbunittest');
+          } catch(e){}
           this.proc.kill('SIGKILL');
           resolve();
         }, 20000).unref();

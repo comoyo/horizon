@@ -10,6 +10,9 @@ const getType = require('mime-types').contentType;
 // TODO: dynamically serve different versions of the horizon
 // library. Minified, Rx included etc.
 const horizon_client_path = require.resolve('@horizon/client/dist/horizon');
+const SignallingDispatcher = require('./sigcoord').SignallingDispatcher;
+const SignallingPool = require('./sigpool').SignallingPool;
+
 
 const endpoints = {
   insert: require('./endpoint/insert'),
@@ -79,6 +82,7 @@ class Server {
     this._interruptor = new Promise((resolve, reject) => {
       this._interrupt = reject;
     });
+    this._sig_dispatcher = new SignallingDispatcher();
 
     try {
       this._reql_conn = new ReqlConnection(opts.rdb_host,
@@ -90,6 +94,10 @@ class Server {
                                            opts.rdb_password || null,
                                            opts.rdb_timeout || null,
                                            this._interruptor);
+      this._sig_pool = new SignallingPool({domain:'',
+                                           hostNameTemplate: 'localhost',
+                                           count: 1,
+                                           rdp_port:opts.rdb_port});
       this._auth = new Auth(this, opts.auth);
       for (const key in endpoints) {
         this.add_request_handler(key, endpoints[key].run);
@@ -209,6 +217,10 @@ class Server {
   ready() {
     return this._reql_conn.ready().then(() => this);
   }
+    
+  ready_signalling() {
+    return this._sig_pool.ready().then(() => this);
+  }
 
   close() {
     if (!this._close_promise) {
@@ -221,6 +233,10 @@ class Server {
       ]);
     }
     return this._close_promise;
+  }
+
+  get_sig_dispatcher() {
+    return this._sig_dispatcher;
   }
 }
 

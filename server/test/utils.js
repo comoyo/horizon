@@ -138,7 +138,8 @@ const start_horizon_server = (done) => {
       });
     horizon_server.ready().catch((err) => logger.info(`horizon server error: ${err}`));
     horizon_server.ready().then(() => logger.info('horizon server ready'));
-    horizon_server.ready().then(() => done());
+    horizon_server.ready_signalling().then(() => logger.info('signalling pool ready'));
+    Promise.all([horizon_server.ready_signalling(), horizon_server.ready()]).then(() => done());
   });
   http_server.on('error', (err) => done(err));
 };
@@ -271,7 +272,7 @@ const set_group = (group, done) => {
       done();
     });
 };
-
+const sig_dispatcher = () => horizon_server.get_sig_dispatcher();
 module.exports = {
   rdb_conn: () => rdb_conn,
   rdb_http_port: () => rdb_http_port,
@@ -296,4 +297,6 @@ module.exports = {
   check_error,
   each_line_in_pipe,
   table,
+
+  sig_dispatcher,
 };

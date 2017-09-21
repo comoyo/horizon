@@ -107,6 +107,7 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
           done(new Error('Operation not permitted.'));
           cursor.close().catch(() => { });
         } else {
+          metadata.sig_dispatcher.track_bound_call(raw_request.options.collection, item);
           send({ data: [ item ] });
         }
       }).then(() => {
@@ -117,6 +118,7 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
         if (!ruleset.validate(context, item)) {
           return done(new Error('Operation not permitted.'));
         }
+        metadata.sig_dispatcher.track_bound_call(raw_request.options.collection, item);
       }
       done({ data: res, state: 'complete' });
     } else if (!ruleset.validate(context, res)) {
