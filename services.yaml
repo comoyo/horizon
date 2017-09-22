@@ -1,2 +1,4 @@
 horizon-server:
   path: ./
+  test: 0.0.1
+  
