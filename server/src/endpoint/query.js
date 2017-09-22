@@ -23,7 +23,7 @@ const make_reql = (raw_request, metadata) => {
   if (parsed.error !== null) { throw new Error(parsed.error.details[0].message); }
   const options = parsed.value;
 
-  const collection = metadata.collection(parsed.value.collection);
+  const collection = metadata.sig_dispatcher.get_query_collection(metadata.collection(parsed.value.collection));
   let reql = collection.table;
 
   const ordered_between = (obj) => {
@@ -98,8 +98,7 @@ const make_reql = (raw_request, metadata) => {
 const run = (raw_request, context, ruleset, metadata, send, done) => {
   let cursor;
   const reql = make_reql(raw_request, metadata);
-
-  reql.run(metadata.connection(), reql_options).then((res) => {
+    reql.run(metadata.sig_dispatcher.get_query_connection(raw_request, metadata.connection()), reql_options).then((res) => {
     if (res !== null && res.constructor.name === 'Cursor') {
       cursor = res;
       return cursor.eachAsync((item) => {

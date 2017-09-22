@@ -82,8 +82,6 @@ class Server {
     this._interruptor = new Promise((resolve, reject) => {
       this._interrupt = reject;
     });
-    this._sig_dispatcher = new SignallingDispatcher();
-
     try {
       this._reql_conn = new ReqlConnection(opts.rdb_host,
                                            opts.rdb_port,
@@ -97,7 +95,10 @@ class Server {
       this._sig_pool = new SignallingPool({domain:'',
                                            hostNameTemplate: 'localhost',
                                            count: 1,
-                                           rdp_port:opts.rdb_port});
+                                           rdb_port:38015 /*|| opts.rdb_port*/,
+                                           project_name : opts.project_name});
+      this._sig_dispatcher = new SignallingDispatcher(this._sig_pool);
+
       this._auth = new Auth(this, opts.auth);
       for (const key in endpoints) {
         this.add_request_handler(key, endpoints[key].run);

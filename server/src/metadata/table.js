@@ -81,6 +81,7 @@ class Table {
   create_index(fields, conn, done) {
     const info = { geo: false, multi: false, fields };
     const index_name = index.info_to_name(info);
+    console.log(index_name, 'eeee');
     error.check(!this.indexes.get(index_name), 'index already exists');
 
     const success = () => {
@@ -90,7 +91,7 @@ class Table {
       this.indexes.set(index_name, new_index); // TODO: shouldn't this be done before we go async?
       return new_index.on_ready(done);
     };
-
+    console.log('new index on ', this.table.name, index_name, index.info_to_reql(info), info);
     this.table.indexCreate(index_name, index.info_to_reql(info),
                            { geo: info.geo, multi: (info.multi !== false) })
       .run(conn)

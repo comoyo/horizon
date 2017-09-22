@@ -180,6 +180,7 @@ class Index {
       if (!found) { return false; }
     }
 
+    console.log('compare indexes', ordered_fields, this.fields)
     for (let i = 0; i < ordered_fields.length; ++i) {
       const pos = this.fields.length - ordered_fields.length + i;
       if (pos < 0 || !compare_fields(ordered_fields[i], this.fields[pos])) { return false; }

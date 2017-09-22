@@ -4,18 +4,26 @@ const logger = require('./logger');
 const LRU = require('lru-cache');
 
 class SignallingDispatcher {
-    constructor() {
-        this.cache = LRU(10000);
+    constructor(sigPool) {
+        this._cache = LRU(10000);
+        this._sigPool = sigPool;
     }
-    
-    bind_call(collection, row) {
-        if (collection !== 'call' || !row.id) {
-            return row;
+    get_tcp_connection_for_call_id(callId) {
+        const coord = this.get_call_coordinate(callId)
+        const sig_conn = this._sigPool.get_connection(coord);
+        return sig_conn.tcp_connection();
+    }
+    bind_call(collection, row, conn) {
+        if (collection === 'signalling' && row.id1) {
+            return this.get_tcp_connection_for_call_id(row.id1);
         }
-        var host = 'localhost'
-        this.cache.set(row.id, host);
+        if (collection !== 'call' || !row.id) {
+            return conn;
+        }
+        const host = this._sigPool.pick_pool_coordinate();
+        this._cache.set(row.id, host);
         row.sigCoord = host;
-        return row;
+        return conn;
     }
 
     track_bound_call(collection, row) {
@@ -28,13 +36,28 @@ class SignallingDispatcher {
         if (this.get_call_coordinate(row.id)) {
             return row;
         }
-        console.log(row.id, row.sigCoord);
-        this.cache.set(row.id, row.sigCoord);
+        this._cache.set(row.id, row.sigCoord);
         return row;
+    }
+    
+    get_query_collection(collection) {
+        if (collection.name === 'signalling') {
+            return this._sigPool.get_collection();
+        }
+        return collection;
+    }
+    
+    get_query_connection(query, conn) {
+        if (query.options.collection !== 'signalling') {
+            return conn;
+        }
+        console.log(query.options.find_all[0]);
+        const callId = query.options.find_all[0].id1;
+        return this.get_tcp_connection_for_call_id(callId);
     }
 
     get_call_coordinate(callId) {
-        return this.cache.get(callId);
+        return this._cache.get(callId);
     }
         
 };

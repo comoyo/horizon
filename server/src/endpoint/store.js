@@ -13,9 +13,8 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
   if (parsed.error !== null) { throw new Error(parsed.error.details[0].message); }
 
   const collection = metadata.collection(parsed.value.collection);
-  const conn = metadata.connection();
-  parsed.value.data.map((row) => metadata.sig_dispatcher.bind_call(parsed.value.collection, row));
-  console.log(parsed.value.data);
+  var conn;
+  parsed.value.data.map((row) => conn = metadata.sig_dispatcher.bind_call(parsed.value.collection, row, metadata.connection()));
   writes.retry_loop(parsed.value.data, ruleset, parsed.value.timeout,
     (rows) => // pre-validation, all rows
       r.expr(rows.map((row) => row.id === undefined ? null : row.id))

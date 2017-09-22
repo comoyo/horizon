@@ -29,6 +29,7 @@ class Collection {
     if (indexes) {
       if (!table) {
         table = new Table(this.table, conn);
+          console.log('added table named', table_id);
         this._tables.set(table_id, table);
       }
       table.update_indexes(indexes, conn);
