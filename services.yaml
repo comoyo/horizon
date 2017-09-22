@@ -1,5 +1,5 @@
 horizon-server:
   path: .
-  build: none
-  test: 0.0.1
+  package: none
+  test: 0.0.2
   
