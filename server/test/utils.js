@@ -135,6 +135,8 @@ const start_horizon_server = (done) => {
           token_secret: 'hunter2',
           allow_unauthenticated: true,
         },
+        sig_rdb_port:38015,
+        sig_rdb_instances:1,
       });
     horizon_server.ready().catch((err) => logger.info(`horizon server error: ${err}`));
     horizon_server.ready().then(() => logger.info('horizon server ready'));

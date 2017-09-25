@@ -93,9 +93,9 @@ class Server {
                                            opts.rdb_timeout || null,
                                            this._interruptor);
       this._sig_pool = new SignallingPool({domain:'',
-                                           hostNameTemplate: 'localhost',
-                                           count: 1,
-                                           rdb_port:38015 /*|| opts.rdb_port*/,
+                                           hostNameTemplate: opts.sig_rdb_template,
+                                           count: opts.sig_rdb_instances,
+                                           rdb_port: opts.sig_rdb_port,
                                            project_name : opts.project_name});
       this._sig_dispatcher = new SignallingDispatcher(this._sig_pool);
 

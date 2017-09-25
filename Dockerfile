@@ -2,7 +2,7 @@
 # * Needs a RETHINKDB_URI environment variable pushed into the container at runtime, with -e RETHINKDB_URI=HOST:PORT
 # * Your Horizon app needs to be mounted into /usr/app using -v /path/to/app:/usr/app
 
-FROM node:8-slim
+FROM node:8-wheezy
 
 RUN yes '' | adduser --disabled-password horizon && \
     mkdir -p /usr/horizon /usr/app /usr/certs
