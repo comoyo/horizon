@@ -92,7 +92,7 @@ class Server {
                                            opts.rdb_password || null,
                                            opts.rdb_timeout || null,
                                            this._interruptor);
-      this._sig_pool = new SignallingPool({domain:'',
+      this._sig_pool = new SignallingPool({domain:opts.sig_domain,
                                            hostNameTemplate: opts.sig_rdb_template,
                                            count: opts.sig_rdb_instances,
                                            rdb_port: opts.sig_rdb_port,

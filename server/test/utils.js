@@ -137,6 +137,7 @@ const start_horizon_server = (done) => {
         },
         sig_rdb_port:38015,
         sig_rdb_instances:1,
+        sig_domain:'',
       });
     horizon_server.ready().catch((err) => logger.info(`horizon server error: ${err}`));
     horizon_server.ready().then(() => logger.info('horizon server ready'));
