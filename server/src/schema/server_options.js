@@ -9,7 +9,7 @@ const server = Joi.object({
   sig_rdb_port: Joi.number().greater(0).less(65536).default(28015),
   sig_rdb_instances: Joi.number().greater(0).less(20).default(1),
   sig_rdb_template: Joi.string().default('localhost'),
-  sig_domain: Joi.string().default(''),
+  sig_domain: Joi.string().allow('').default(''),
     
   auto_create_collection: Joi.boolean().default(false),
   auto_create_index: Joi.boolean().default(false),
