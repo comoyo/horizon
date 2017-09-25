@@ -7,7 +7,7 @@ FROM node:8-wheezy
 RUN yes '' | adduser --disabled-password horizon && \
     mkdir -p /usr/horizon /usr/app /usr/certs
 
-RUN apt update && apt install -y git
+RUN apt-get update && apt-get install -y git
 
 COPY . /usr/horizon/
 WORKDIR /usr/horizon
