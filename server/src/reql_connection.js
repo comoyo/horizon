@@ -26,6 +26,7 @@ class ReqlConnection {
     this._auto_create_index = auto_create_index;
     this._clients = new Set();
     this._reconnect_delay = 0;
+    this._max_reconnect_delay = 1000;
     this._retry_timer = null;
 
     interruptor.catch((err) => {
@@ -66,7 +67,7 @@ class ReqlConnection {
     } else if (!this._retry_timer) {
       return new Promise((resolve) => {
         this._retry_timer = setTimeout(() => resolve(this._init_connection()), this._reconnect_delay);
-        this._reconnect_delay = Math.min(this._reconnect_delay + 100, 1000);
+        this._reconnect_delay = Math.min(this._reconnect_delay + 100, this._max_reconnect_delay);
       });
     }
   }

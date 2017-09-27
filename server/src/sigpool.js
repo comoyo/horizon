@@ -20,7 +20,7 @@ const create_collection = (db, name, conn) =>
 class SignallingConnection extends ReqlConnection {
   _init_connection() {
     this._retry_timer = null;
-
+    this._max_reconnect_delay = 15000;
     return r.connect(this._rdb_options).then((conn) => {
       if (this._interrupted_err) {
         return Promise.reject(this._interrupted_err);
@@ -52,8 +52,6 @@ class SignallingConnection extends ReqlConnection {
     }).then(() => {
         return this;
     }).catch((err) => {
-      logger.error(`Signalling Connection to RethinkDB terminated: ${err}`);
-      logger.debug(`stack: ${err.stack}`);
       return this._reconnect();
     });
   }
