@@ -107,7 +107,7 @@ const oauth2 = (raw_options) => {
   const extract_id = options.extract_id;
 
   const self_url = (host, path) =>
-    url.format({ protocol: 'https', host: host, pathname: path });
+    url.format({ protocol: 'https', host: host.replace(':8080', '', pathname: path });
 
   const make_success_url = (horizon_token) =>
     url.format(extend_url_query(horizon._auth._success_redirect, { horizon_token }));
