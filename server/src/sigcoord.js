@@ -14,6 +14,10 @@ class SignallingDispatcher {
         return sig_conn.tcp_connection();
     }
     bind_call(collection, row, conn) {
+        if (collection === 'ice' && row.id1) {
+            row.timestamp = new Date().getTime();
+            return conn;
+        }
         if (collection === 'signalling' && row.id1) {
             row.timestamp = new Date().getTime();
             return this.get_tcp_connection_for_call_id(row.id1);
