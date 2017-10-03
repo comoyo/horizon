@@ -15,6 +15,7 @@ class SignallingDispatcher {
     }
     bind_call(collection, row, conn) {
         if (collection === 'signalling' && row.id1) {
+            row.timestamp = new Date().getTime();
             return this.get_tcp_connection_for_call_id(row.id1);
         }
         if (collection !== 'call' || !row.id) {
@@ -55,8 +56,8 @@ class SignallingDispatcher {
         if (objWithCallId == undefined) {
             objWithCallId = query.options.data;
         }
-        console.log(objWithCallId[0]);
         const callId = objWithCallId[0].id1;
+        console.log(objWithCallId[0]);
         return this.get_tcp_connection_for_call_id(callId);
     }
     

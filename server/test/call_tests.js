@@ -25,6 +25,7 @@ const all_tests = (collection) => {
   const without_version = (item) => {
       const res = Object.assign({ }, item);
       delete res[hz_v];
+      delete res['timestamp'];
       return res;
   };
   const check_collection_data = (actual, expected) => {
