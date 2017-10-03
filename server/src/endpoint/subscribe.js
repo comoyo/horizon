@@ -12,7 +12,7 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
                  include_types: true,
                  include_offsets: Boolean(raw_request.options.order) &&
                                   Boolean(raw_request.options.limit) })
-    .run(metadata.connection(), reql_options)
+    .run(metadata.sig_dispatcher.get_query_connection(raw_request, metadata.connection()), reql_options)
     .then((res) => {
       feed = res;
       feed.eachAsync((item) => {
@@ -24,6 +24,7 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
                    (item.new_val && !ruleset.validate(context, item.new_val))) {
           throw new Error('Operation not permitted.');
         } else {
+          metadata.sig_dispatcher.track_bound_call(raw_request.options.collection, item);
           send({ data: [ item ] });
         }
       }).then(() => {
