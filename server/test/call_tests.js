@@ -104,7 +104,46 @@ const all_tests = (collection) => {
           const expected = [ { id: 'callid-1', fromMsisdn: '1', sigCoord:'localhost' } ];
           check_collection('call', expected, test_case_write);
       });
+  });
+    
+  it('signalling upsert.', (done) => {
+      const request = (row) => make_request('call', 'store', [ row ]);
+      const sig_request = (row) => make_request('signalling', 'upsert', [ row ]);
+      const sig = { id: 'sig-1', id1: 'callid-1', type: 'offer' };
+
+      const test_case_write = () => {
+          utils.stream_test(sig_request(sig), (err, res) => {
+              assert.ifError(err);
+              const expected = [ sig ];
+              check_collection('signalling', [sig], test_case_read);
+          });
+      }
+      
+      const test_case_read = () => {
+          utils.stream_test(
+              {
+                  request_id: 0,
+                  type: 'query',
+                  options: {
+                      collection:'signalling',
+                      find_all: [ { id1: 'callid-1' } ],
+                  },
+              },
+              (err, res) => {
+                  assert.ifError(err);
+                  console.log(res);
+                  check_collection_data(res, [sig]);
+                  done();
+              });
+      }
+      
+      utils.stream_test(request({ id: 'callid-1', fromMsisdn: '1' }), (err, res) => {
+          assert.ifError(err);
+          const expected = [ { id: 'callid-1', fromMsisdn: '1', sigCoord:'localhost' } ];
+          check_collection('call', expected, test_case_write);
+      });
   });    
+    
 };
 
 const suite = (collection) => describe('Call ', () => all_tests(collection));

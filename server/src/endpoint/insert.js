@@ -11,9 +11,8 @@ const run = (raw_request, context, ruleset, metadata, send, done) => {
   const parsed = Joi.validate(raw_request.options, insert);
   if (parsed.error !== null) { done(new Error(parsed.error.details[0].message)); }
 
-  //const collection = metadata.collection(parsed.value.collection);
+  const collection = metadata.collection(parsed.value.collection);
   //const conn = metadata.connection();
-  const collection = metadata.sig_dispatcher.get_query_collection(metadata.collection(parsed.value.collection));
   const conn = metadata.sig_dispatcher.get_query_connection(raw_request, metadata.connection())
 
   writes.retry_loop(parsed.value.data, ruleset, parsed.value.timeout,

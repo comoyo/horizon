@@ -51,11 +51,15 @@ class SignallingDispatcher {
         if (query.options.collection !== 'signalling') {
             return conn;
         }
-        console.log(query.options.find_all[0]);
-        const callId = query.options.find_all[0].id1;
+        let objWithCallId = query.options.find_all;
+        if (objWithCallId == undefined) {
+            objWithCallId = query.options.data;
+        }
+        console.log(objWithCallId[0]);
+        const callId = objWithCallId[0].id1;
         return this.get_tcp_connection_for_call_id(callId);
     }
-
+    
     get_call_coordinate(callId) {
         return this._cache.get(callId);
     }

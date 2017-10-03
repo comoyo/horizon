@@ -6,6 +6,18 @@ const logger = require('./logger');
 const r = require('rethinkdb');
 const ReqlConnection = require('./reql_connection').ReqlConnection;
 const Collection = require('./metadata/collection').Collection;
+
+const initialize_metadata = (db, conn) =>
+  r.branch(r.dbList().contains(db), null, r.dbCreate(db)).run(conn)
+    .then(() =>
+      Promise.all([ 'hz_collections', 'hz_users_auth', 'hz_groups' ].map((table) =>
+        r.branch(r.db(db).tableList().contains(table),
+                 { },
+                 r.db(db).tableCreate(table))
+          .run(conn))))
+    .then(() =>
+      r.db(db).table('hz_collections').wait({ timeout: 30 }).run(conn));
+
 const create_collection = (db, name, conn) =>
   r.db(db).table('hz_collections').get(name).replace({ id: name }).do((res) =>
     r.branch(
@@ -35,9 +47,10 @@ class SignallingConnection extends ReqlConnection {
         logger.error('Lost connection to RethinkDB.');
         this._reconnect();
       });
-
       // This is to avoid EPIPE errors - handling is done by the 'close' listener
       this._conn.on('error', () => { });
+      return initialize_metadata(this._rdb_options.db, this._conn);
+    }).then(() => {
       this._collection = new Collection(this._rdb_options.db, 'signalling');
       return create_collection(this._rdb_options.db, 'signalling', this._conn);
     }).then((res) => {
